@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Downloader</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 520px;
+            text-align: center;
+        }
+        h1 { margin-bottom: 8px; font-size: 28px; }
+        p { margin-bottom: 30px; opacity: 0.9; }
+        input {
+            width: 100%;
+            padding: 16px;
+            margin-bottom: 25px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 16px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .video-btn { background: #ff0066; color: white; }
+        .audio-btn { background: #00cc88; color: white; }
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        .note {
+            margin-top: 30px;
+            font-size: 14px;
+            opacity: 0.85;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Social Downloader</h1>
+        <p>Works with YouTube, TikTok, Instagram, SoundCloud, Audiomack & more</p>
+        
+        <input type="text" id="url" placeholder="Paste link here..." autocomplete="off">
+        
+        <button class="video-btn" onclick="downloadVideo()">⬇️ Download Video</button>
+        <button class="audio-btn" onclick="downloadAudio()">🎵 Download Audio (MP3)</button>
+        
+        <div class="note">
+            TikTok & Instagram = Very Reliable<br>
+            YouTube & Audio sources may need retries
+        </div>
+    </div>
+
+    <script>
+        async function makeDownload(url, isAudio) {
+            if (!url) return alert("Please paste a link");
+
+            try {
+                let fetchUrl = `/download?url=${encodeURIComponent(url)}`;
+                if (isAudio) fetchUrl += "&audio=true";
+
+                const response = await fetch(fetchUrl);
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const link = document.createElement("a");
+                    link.href = URL.createObjectURL(blob);
+                    link.download = isAudio ? "audio.mp3" : "video.mp4";
+                    link.click();
+                } else {
+                    const err = await response.json();
+                    alert(err.detail || "Download failed. Try again.");
+                }
+            } catch (e) {
+                alert("Connection error. Please try again.");
+            }
+        }
+
+        function downloadVideo() {
+            const url = document.getElementById("url").value.trim();
+            makeDownload(url, false);
+        }
+
+        function downloadAudio() {
+            const url = document.getElementById("url").value.trim();
+            makeDownload(url, true);
+        }
+    </script>
+</body>
+</html>
