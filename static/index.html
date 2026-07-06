@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Downloader</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        p {
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        input {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .video-btn {
+            background: #ff0066;
+            color: white;
+        }
+        .audio-btn {
+            background: #00cc66;
+            color: white;
+        }
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .note {
+            margin-top: 25px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎥 Social Downloader</h1>
+        <p>Paste link from TikTok, Instagram, YouTube, Facebook, etc.</p>
+        
+        <input type="text" id="url" placeholder="https://www.tiktok.com/@user/video/..." autocomplete="off">
+        
+        <button class="video-btn" onclick="downloadVideo()">⬇️ Download Video</button>
+        <button class="audio-btn" onclick="downloadAudio()">🎵 Download Audio Only</button>
+        
+        <div class="note">
+            Best with TikTok & Instagram<br>
+            YouTube may need multiple tries
+        </div>
+    </div>
+
+    <script>
+        async function downloadVideo() {
+            const url = document.getElementById("url").value.trim();
+            if (!url) return alert("Please paste a link");
+            
+            try {
+                const response = await fetch(`/download?url=${encodeURIComponent(url)}`);
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const link = document.createElement("a");
+                    link.href = URL.createObjectURL(blob);
+                    link.download = "video.mp4";
+                    link.click();
+                } else {
+                    const err = await response.json();
+                    alert(err.detail || "Download failed");
+                }
+            } catch (e) {
+                alert("Connection error. Try again.");
+            }
+        }
+
+        async function downloadAudio() {
+            alert("Audio download feature coming soon.\nUse Video download for now.");
+        }
+    </script>
+</body>
+</html>
