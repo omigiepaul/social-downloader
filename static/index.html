@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Downloader</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 520px;
+            text-align: center;
+        }
+        h1 { margin-bottom: 8px; font-size: 28px; }
+        p { margin-bottom: 25px; opacity: 0.9; }
+        input {
+            width: 100%;
+            padding: 16px;
+            margin-bottom: 25px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 16px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .video-btn { background: #ff0066; color: white; }
+        .audio-btn { background: #00cc88; color: white; }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .status {
+            margin-top: 20px;
+            min-height: 24px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Social Downloader</h1>
+        <p>Supports TikTok, Instagram, YouTube, SoundCloud, Audiomack & more</p>
+        
+        <input type="text" id="url" placeholder="Paste your link here..." autocomplete="off">
+        
+        <button class="video-btn" id="videoBtn" onclick="downloadVideo()">⬇️ Download Video</button>
+        <button class="audio-btn" id="audioBtn" onclick="downloadAudio()">🎵 Download Audio (MP3)</button>
+        
+        <div class="status" id="status"></div>
+        
+        <div class="note" style="margin-top: 30px; font-size: 14px; opacity: 0.8;">
+            TikTok & Instagram = Best Results<br>
+            YouTube may take longer or need retries
+        </div>
+    </div>
+
+    <script>
+        let isDownloading = false;
+
+        async function makeDownload(isAudio) {
+            if (isDownloading) return;
+            
+            const url = document.getElementById("url").value.trim();
+            if (!url) return alert("Please paste a link");
+
+            isDownloading = true;
+            const statusEl = document.getElementById("status");
+            const videoBtn = document.getElementById("videoBtn");
+            const audioBtn = document.getElementById("audioBtn");
+
+            videoBtn.disabled = true;
+            audioBtn.disabled = true;
+            statusEl.textContent = "Processing... Please wait";
+
+            try {
+                let fetchUrl = `/download?url=${encodeURIComponent(url)}`;
+                if (isAudio) fetchUrl += "&audio=true";
+
+                const response = await fetch(fetchUrl);
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const link = document.createElement("a");
+                    link.href = URL.createObjectURL(blob);
+                    link.download = isAudio ? "song.mp3" : "video.mp4";
+                    link.click();
+                    statusEl.textContent = "Download started!";
+                } else {
+                    const err = await response.json();
+                    statusEl.textContent = err.detail || "Failed. Try again.";
+                }
+            } catch (e) {
+                statusEl.textContent = "Connection error. Try again later.";
+            } finally {
+                isDownloading = false;
+                videoBtn.disabled = false;
+                audioBtn.disabled = false;
+            }
+        }
+
+        function downloadVideo() { makeDownload(false); }
+        function downloadAudio() { makeDownload(true); }
+    </script>
+</body>
+</html>
